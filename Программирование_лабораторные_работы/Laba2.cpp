@@ -6,185 +6,158 @@
 #include <math.h>
 
 using namespace std;
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <cstring>
+using namespace std;
 
-struct UAV_position_regular_system
+struct Info 
 {
-	struct Current_coord
-	{
-		double x,y,z;
-	};
-	
-	struct Goal_coord
-	{
-		double x,y,z;
-	};
-	
-	struct Start_coord
-	{
-		double x = 0.0, y = 0.0, z = 0.0; 
-	};
-	
-	public:
-		void set_start_position(double Sx, double Sy, double Sz)
-		{
-			start_position.x = Sx;
-			start_position.y = Sy;
-			start_position.z = Sz;
-		}
-		
-		Start_coord get_start_position()
-		{
-			return start_position;		
-		}
-		
-		void set_uav_position(double Dx, double Dy, double Dz)
-		{
-			uav_coord.x = Dx - start_position.x;
-			uav_coord.y = Dy - start_position.y;
-			uav_coord.z = Dz - start_position.z;
-		}
-		
-		Current_coord get_uav_position()
-		{
-			return uav_coord;		
-		}
-		
-		void set_goal_position(double Gx, double Gy, double Gz)
-		{
-			goal_coord.x = Gx;
-			goal_coord.y = Gy;
-			goal_coord.z = Gz;
-		}
-		
-		Goal_coord get_goal_position()
-		{
-			return goal_coord;		
-		}
-		
-		void culculate_distance_to_goal()
-		{
-			distance_to_goal = sqrt(pow(goal_coord.x - uav_coord.x,2)+pow(goal_coord.y - uav_coord.y,2)+pow(goal_coord.z - uav_coord.z,2));
-		}
-		
-		double get_distance_to_goal()
-		{
-			return distance_to_goal;
-		}
-		
-		void culculate_direction_cos()
-		{
-			dir_cos.resize(4);
-			
-			dir_cos.at(0) = (goal_coord.x-uav_coord.x)/distance_to_goal;
-			dir_cos.at(1) = (goal_coord.y-uav_coord.y)/distance_to_goal;
-			dir_cos.at(2) = (goal_coord.z-uav_coord.z)/distance_to_goal;
-		}
-		
-		vector<double> get_direction_cos()
-		{
-			return dir_cos;
-		}
-		
-		void set_speed_limit(double limit)
-		{
-			speed_limit = limit;
-		}
-		
-		double get_speed_limit()
-		{
-			return speed_limit;
-		}
-		
-		vector<double> get_speeds()
-		{
-			speeds.resize(3);			
-			if(distance_to_goal < speed_limit)
-			{				
-				speeds.at(0) = distance_to_goal*dir_cos.at(0);
-				speeds.at(1) = distance_to_goal*dir_cos.at(1);
-				speeds.at(2) = distance_to_goal*dir_cos.at(2);
-			}
-			else
-			{
-				speeds.at(0) = speed_limit*dir_cos.at(0);
-				speeds.at(1) = speed_limit*dir_cos.at(1);
-				speeds.at(2) = speed_limit*dir_cos.at(2);
-			}
-			
-			return speeds;
-		}	
-	private:
-		Current_coord uav_coord;
-		Goal_coord goal_coord;
-		Start_coord start_position;
-		
-		double speed;
-		vector<double> dir_cos;
-		vector<double> speeds;
-		double distance_to_goal = 0;
-		double speed_limit;
+    char fio[64];
+    char license[32];
 };
-int main()
+
+struct UAV 
 {
-	setlocale(LC_ALL,"russian");
-	
-    UAV_position_regular_system UAV_PRS;
-    UAV_position_regular_system::Start_coord start_position;
-    UAV_position_regular_system::Current_coord uav_position;
-    UAV_position_regular_system::Goal_coord goal_position;
-    
-    vector<double> sp;
-    vector<double> up;
-    vector<double> gp;
-    vector<double> dir_cos;
-    vector<double>speeds;
-    
-    double dtg;
-    double sl;
-    
-    sp.resize(3);
-    up.resize(3);
-    gp.resize(3);
-	dir_cos.resize(4);
-	speeds.resize(3);
-	
-	cout << "===============Система позиционного регулирования БЛА===============" << endl;
-	cout << "Введите координаты стартовой позиции:" << endl;
-	cin >> sp.at(0);
-	cin >> sp.at(1);
-	cin >> sp.at(2);
-	cout << "Введите координаты текущей позиции аппарата:" << endl;
-	cin >> up.at(0);
-	cin >> up.at(1);
-	cin >> up.at(2);
-	cout << "Введите координаты целевой позиции аппарата:" << endl;
-	cin >> gp.at(0);
-	cin >> gp.at(1);
-	cin >> gp.at(2);
-	
-	cout << "Введите максимальное значение скорости:" << endl;
-	cin >> sl;
-	
-    UAV_PRS.set_start_position(sp.at(0),sp.at(1),sp.at(2));
-    UAV_PRS.set_uav_position(up.at(0),up.at(1),up.at(2));
-    UAV_PRS.set_goal_position(gp.at(0),gp.at(1),gp.at(2));
-    
-    UAV_PRS.set_speed_limit(sl);
-	UAV_PRS.culculate_distance_to_goal();
-	UAV_PRS.culculate_direction_cos();
-	
-	dir_cos = UAV_PRS.get_direction_cos();
-	speeds = UAV_PRS.get_speeds();
-	
-	start_position = UAV_PRS.get_start_position();
-	uav_position = UAV_PRS.get_uav_position();
-	goal_position = UAV_PRS.get_goal_position();
-	
-	cout << "\nКоординаты начальной позиции аппарата: [" << start_position.x <<", " << start_position.y << ", " << start_position.z << "]" << endl;
-	cout << "Координаты текущей позиции аппарата: [" << uav_position.x <<", " << uav_position.y << ", " << uav_position.z << "]" << endl;
-	cout << "Координаты целевой позиции аппарата: [" << goal_position.x <<", " << goal_position.y << ", " << goal_position.z << "]" << endl;
-	cout << "Максимальное значение скорости аппарата: " << sl << endl;
-	cout << "Расстояние до точки: " << UAV_PRS.get_distance_to_goal() << endl;
-	cout << "Направляющие косинусы: [" << dir_cos.at(0) << ", " << dir_cos.at(1) << ", " << dir_cos.at(2) << "]" << endl;
-	cout << "Итоговые значения скоростей: [" << speeds.at(0) << ", " << speeds.at(1) << ", " << speeds.at(2) << "]" << endl;
+    char model[32];
+    int year;
+    Info info;
+    char controlSystem[64]; 
+};
+
+const char* FILENAME = "uav.dat";
+
+// Создать файл
+void createFile() 
+{
+    ofstream file(FILENAME, ios::binary | ios::trunc);
+    file.close();
+    cout << "Файл создан.\n";
+}
+
+void addRecord()
+ {
+    UAV uav;
+    cout << "Модель: "; cin.getline(uav.model, 32);
+    cout << "Год выпуска: "; cin >> uav.year;
+    cout << "ФИО владельца: "; cin >> ws; cin.getline(uav.info.fio, 64);
+    cout << "Номер удостоверения: "; cin.getline(uav.info.license, 32);
+    cout << "Система управления: "; cin >> ws; cin.getline(uav.controlSystem, 64);
+
+    ofstream file(FILENAME, ios::binary | ios::app);
+    file.write(reinterpret_cast<char*>(&uav), sizeof(UAV));
+    file.close();
+    cout << "Запись добавлена.\n";
+}
+
+void viewFile() {
+    ifstream file(FILENAME, ios::binary);
+    UAV uav;
+    int idx = 0;
+    while (file.read(reinterpret_cast<char*>(&uav), sizeof(UAV))) {
+        cout << "\nЗапись #" << ++idx << endl;
+        cout << "Модель: " << uav.model << endl;
+        cout << "Год выпуска: " << uav.year << endl;
+        cout << "ФИО владельца: " << uav.info.fio << endl;
+        cout << "Номер удостоверения: " << uav.info.license << endl;
+        cout << "Система управления: " << uav.controlSystem << endl;
+    }
+    file.close();
+    if (idx == 0) cout << "Файл пуст.\n";
+}
+
+void deleteRecord() 
+{
+    cout << "Введите номер записи для удаления: ";
+    int delNum; cin >> delNum;
+    ifstream file(FILENAME, ios::binary);
+    vector<UAV> records;
+    UAV uav;
+    int idx = 0;
+    while (file.read(reinterpret_cast<char*>(&uav), sizeof(UAV))) {
+        ++idx;
+        if (idx != delNum) records.push_back(uav);
+    }
+    file.close();
+    ofstream out(FILENAME, ios::binary | ios::trunc);
+for (size_t i = 0; i < records.size(); ++i)
+    out.write(reinterpret_cast<const char*>(&records[i]), sizeof(UAV));
+    out.close();
+    cout << "Запись удалена (если существовала).\n";
+}
+
+void updateRecord() {
+    cout << "Введите номер записи для обновления: ";
+    int updNum; cin >> updNum;
+    fstream file(FILENAME, ios::binary | ios::in | ios::out);
+    UAV uav;
+    int idx = 0;
+    streampos pos;
+    while (file.read(reinterpret_cast<char*>(&uav), sizeof(UAV))) {
+        ++idx;
+        if (idx == updNum) {
+            pos = file.tellg();
+            cout << "Введите новые данные:\n";
+            cout << "Модель: "; cin.getline(uav.model, 32);
+            cout << "Год выпуска: "; cin >> uav.year;
+            cout << "ФИО владельца: "; cin >> ws; cin.getline(uav.info.fio, 64);
+            cout << "Номер удостоверения: "; cin.getline(uav.info.license, 32);
+            cout << "Система управления: "; cin >> ws; cin.getline(uav.controlSystem, 64);
+            file.seekp(pos - static_cast<streamoff>(sizeof(UAV)));
+            file.write(reinterpret_cast<char*>(&uav), sizeof(UAV));
+            cout << "Запись обновлена.\n";
+            break;
+        }
+    }
+    file.close();
+}
+
+void findOwnerBySystem() 
+{
+    cout << "Введите систему управления БПЛА: ";
+    char searchSystem[32];
+    cin >> ws; cin.getline(searchSystem, 32);
+    ifstream file(FILENAME, ios::binary);
+    UAV uav;
+    bool found = false;
+    while (file.read(reinterpret_cast<char*>(&uav), sizeof(UAV)))
+	{
+        if (strcmp(uav.controlSystem, searchSystem) == 0) 
+		{
+            cout << "ФИО владельца: " << uav.info.fio << endl;
+            found = true;
+        }
+    }
+    file.close();
+    if (!found) cout << "БПЛА с такой системой управления не найден.\n";
+}
+
+
+int main() {
+    setlocale(LC_ALL, "Russian");
+    int choice;
+    do {
+        cout << "\nМеню:\n";
+        cout << "1. Создание файла\n";
+        cout << "2. Добавление записи\n";
+        cout << "3. Удаление записи\n";
+        cout << "4. Просмотр всего файла\n";
+        cout << "5. Обновление записи\n";
+        cout << "6. Найти ФИО владельца по ситеме управления\n";
+        cout << "7. Выход\n";
+        cout << "Выберите действие: ";
+        cin >> choice;
+        switch (choice) {
+            case 1: createFile(); break;
+            case 2: addRecord(); break;
+            case 3: deleteRecord(); break;
+            case 4: viewFile(); break;
+            case 5: updateRecord(); break;
+            case 6: findOwnerBySystem(); break;
+            case 7: cout << "Выход.\n"; break;
+            default: cout << "Неверный выбор.\n";
+        }
+    } while (choice != 8);
+    return 0;
 }

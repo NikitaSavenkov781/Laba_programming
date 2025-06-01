@@ -1,7 +1,5 @@
 #include <iostream>
 #include <locale.h>
-#include <typeinfo.h>
-
 #include <cstdlib>
 #include <ctime>
 
@@ -9,77 +7,104 @@
 
 using namespace std;
 
-void set_array(float** array,int size)
-{
-	srand(time(NULL));
-	
-	
-	for(int i = 0; i < size; i++)
-	{
-		for(int j = 0; j < size; j++)
-			array[i][j] = (rand()%10000)*0.1-500;	
-	}
-}
+class Matrix {
+private:
+    float** array;
+    int size;
 
-void calculate_arr(float** array, int size)
-{
-	float summ = 0;
-	float mult = 1;
-	
-	for(int i = 0; i < size; i++)
+public:
+    Matrix(int size) : size(size)
 	{
-		for(int j = 0; j < size; j++)
+        array = new float*[size];
+        for (int i = 0; i < size; ++i) 
 		{
-			if(array[i][j] < 0)
+            array[i] = new float[size];
+        }
+    }
+
+    ~Matrix() 
+	{
+        for (int i = 0; i < size; ++i) 
+		{
+            delete[] array[i];
+        }
+        delete[] array;
+    }
+
+    void set_array() 
+	{
+        srand(time(NULL));
+        for (int i = 0; i < size; i++) 
+		{
+            for (int j = 0; j < size; j++) 
 			{
-				summ += array[i][j];
-				mult *= array[i][j];
-			}
-		}	
-	}
-	if(mult != 1)
-	{
-		cout << "ïðîèçâåäåíèå îòðèöàòåëüíûõ ýëåìåíòîâ = " << mult << endl;
-		cout << "ñóììà îòðèöàòåëüíûõ ýëåìåíòîâ = " << summ << endl;
-	}
-	else
-		cout << "Íåò îòðèöàòåëüíûõ ýëåìåíòîâ" << endl;
-}
+                array[i][j] = (rand() % 10000) * 0.1f - 500;
+            }
+        }
+    }
 
-int main()
-{
-	setlocale(LC_ALL,"russian");
-	
-	
-	float inSize;
-	int size;
-	float** arr;
-	
-	while(true)
+    void print_array()  
 	{
-		cout << "Ââåäèòå ðàçìåðíîñòü êâàäðàòíîé ìàòðèöû (öåëîå ÷èñëî îò 1 äî 10): " << endl;
+        for (int i = 0; i < size; i++) 
+		{
+            for (int j = 0; j < size; j++)
+			 {
+                cout << " " << array[i][j];
+            }
+            cout << endl;
+        }
+    }
 
-		cin >> inSize;
-		 size = int(inSize);
-		
-		if(size >= 1 && size <= 10 && int(size) == inSize)
-		{	
-			break;
-		}
-	}
-	
-	arr = new float*[size];      
-	for (int i = 0; i < size; ++i)
-    	arr[i] = new float[size];
-    	
-	set_array(arr,size);
-	
-	for(int i = 0; i < size; i++)
+    void calculate_arr()  
 	{
-		for(int j = 0; j < size; j++)
-			cout << " " << arr[i][j];
-		cout << endl;	
-	}
-	
-	calculate_arr(arr,size);
+        float summ = 0;
+        float mult = 1;
+        bool has_negative = false;
+
+        for (int i = 0; i < size; i++) 
+		{
+            for (int j = 0; j < size; j++) 
+			{
+                if (array[i][j] < 0)
+				 {
+                    summ += array[i][j];
+                    mult *= array[i][j];
+                    has_negative = true;
+                }
+            }
+        }
+
+        if (has_negative) 
+		{
+            cout << "ÃÃ°Ã®Ã¨Ã§Ã¢Ã¥Ã¤Ã¥Ã­Ã¨Ã¥ Ã®Ã²Ã°Ã¨Ã¶Ã Ã²Ã¥Ã«Ã¼Ã­Ã»Ãµ Ã½Ã«Ã¥Ã¬Ã¥Ã­Ã²Ã®Ã¢ = " << mult << endl;
+            cout << "Ã‘Ã³Ã¬Ã¬Ã  Ã®Ã²Ã°Ã¨Ã¶Ã Ã²Ã¥Ã«Ã¼Ã­Ã»Ãµ Ã½Ã«Ã¥Ã¬Ã¥Ã­Ã²Ã®Ã¢ = " << summ << endl;
+        } else {
+            cout << "ÃÃ¥Ã² Ã®Ã²Ã°Ã¨Ã¶Ã Ã²Ã¥Ã«Ã¼Ã­Ã»Ãµ Ã½Ã«Ã¥Ã¬Ã¥Ã­Ã²Ã®Ã¢" << endl;
+        }
+    }
+};
+
+int main() {
+    setlocale(LC_ALL, "russian");
+
+    float inSize;
+    int size;
+
+    while (true) {
+        cout << "Ã‚Ã¢Ã¥Ã¤Ã¨Ã²Ã¥ Ã°Ã Ã§Ã¬Ã¥Ã°Ã­Ã®Ã±Ã²Ã¼ ÃªÃ¢Ã Ã¤Ã°Ã Ã²Ã­Ã®Ã© Ã¬Ã Ã²Ã°Ã¨Ã¶Ã» (Ã¶Ã¥Ã«Ã®Ã¥ Ã·Ã¨Ã±Ã«Ã® Ã®Ã² 1 Ã¤Ã® 10): " << endl;
+        cin >> inSize;
+        size = int(inSize);
+
+        if (size >= 1 && size <= 10 && size == inSize) {
+            break;
+        }
+    }
+
+    Matrix matrix(size);
+
+    matrix.set_array();
+    matrix.print_array();
+    matrix.calculate_arr();
+
+    return 0;
 }
